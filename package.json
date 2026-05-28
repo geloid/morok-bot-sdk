@@ -1,0 +1,59 @@
+{
+  "name": "morok-bot-sdk",
+  "version": "1.0.1",
+  "description": "Node.js SDK for building bots on the Morok E2E messaging platform",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "README.ru.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build":     "tsc -p tsconfig.json --declaration false --declarationMap false && tsc -p tsconfig.json --emitDeclarationOnly --removeComments false",
+    "clean":     "rm -rf dist docs-api",
+    "dev":       "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "test":      "vitest run",
+    "test:watch":"vitest",
+    "docs:api":  "typedoc"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "dependencies": {
+    "@privacyresearch/libsignal-protocol-typescript": "^0.0.16",
+    "axios": "^1.15.0",
+    "ws":    "^8.20.0",
+    "zod":   "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@types/ws":   "^8.18.1",
+    "tsx":         "^4.19.2",
+    "typedoc":     "^0.28.0",
+    "typescript":  "^5.9.3",
+    "vitest":      "^2.1.4"
+  },
+  "license": "Apache-2.0",
+  "keywords": ["morok", "bot", "sdk", "e2e", "signal", "messaging", "encryption"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geloid/morok-bot-sdk.git"
+  },
+  "homepage": "https://morok.me",
+  "bugs": {
+    "url": "https://github.com/geloid/morok-bot-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

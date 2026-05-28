@@ -1,0 +1,7 @@
+# Per-example state. Never commit either of these:
+#   • *.morokbot      - the bot's long-lived token + identity keys
+#   • bot-state/      - private prekey pool and Signal sessions
+*.morokbot
+bot-state/
+*-bot-state/
+inbox/

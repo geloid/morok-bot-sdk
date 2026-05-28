@@ -1,0 +1,32 @@
+# ─── Bot credentials and runtime state ─── NEVER commit these ─────
+# A .morokbot file contains the bot's signing key. Anyone with this
+# file can impersonate your bot. Treat it like an SSH private key.
+*.morokbot
+
+# bot-state/ holds the bot's full Signal identity, prekey pool, and
+# Double Ratchet sessions after first start. Losing access = losing
+# the bot's identity to peers. Committing it = handing decryption
+# keys to whoever can read the repo.
+bot-state/
+*-bot-state/
+
+# ─── Node.js ──────────────────────────────────────────────────────
+node_modules/
+dist/
+docs-api/
+*.log
+*.tsbuildinfo
+.npm/
+
+# ─── Local env / secrets ──────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── OS / editor ──────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo

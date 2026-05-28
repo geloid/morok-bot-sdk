@@ -1,0 +1,36 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints":    ["src/index.ts"],
+    "out":            "docs-api",
+    "name":           "morok-bot-sdk",
+    "tsconfig":       "tsconfig.json",
+    "includeVersion": true,
+    "excludePrivate":     true,
+    "excludeInternal":    true,
+    "excludeProtected":   false,
+    "excludeReferences":  false,
+    "readme":         "README.md",
+    "githubPages":    false,
+    "hideGenerator":  true,
+    "navigationLinks": {
+        "GitHub":   "https://github.com/geloid/morok-bot-sdk",
+        "npm":      "https://www.npmjs.com/package/morok-bot-sdk",
+        "Site":     "https://morok.me"
+    },
+    "sidebarLinks": {
+        "API reference": "https://morok.me/api/reference",
+        "Deployment":    "https://morok.me/api/deployment"
+    },
+    "categorizeByGroup": true,
+    "sort": [
+        "static-first",
+        "required-first",
+        "alphabetical"
+    ],
+    "validation": {
+        "notExported":   false,
+        "invalidLink":   true,
+        "notDocumented": false
+    },
+    "treatWarningsAsErrors": false
+}
