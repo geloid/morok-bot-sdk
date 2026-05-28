@@ -68,6 +68,13 @@ const DEDUP_TTL_MS      = 5 * 60 * 1000
 const BACKFILL_REQ_THROTTLE_MS  = 5_000
 const BACKFILL_REQ_THROTTLE_MAX = 4096
 
+const PROTOCOL_KINDS: ReadonlySet<string> = new Set([
+    'decrypt_share', 'decrypt_share_response',
+    'signal_warmup',
+    'morok_xsk_propagation', 'morok_xsk_request',
+    'morok_peer_session_reset_request', 'morok_dm_backfill',
+])
+
 class DedupCache {
     private entries = new Map<string, number>()
     has(key: string): boolean {
@@ -235,18 +242,25 @@ export class ReceiveFlow {
             )
         } catch (err) {
             this.logger?.warn(
-                { err: (err as Error).message, senderId, deviceId: frame.senderDeviceId, messageType },
+                { err: (err as Error).message, senderId, deviceId: frame.senderDeviceId, messageType, kind: frame.kind },
                 '[receive] decrypt failed',
             )
-            this.emitter.emit({
-                kind:  'error',
-                error: new Error(
-                    `decrypt failed for senderId=${senderId}.${frame.senderDeviceId} type=${messageType}: ${(err as Error).message}`,
-                ),
-            })
+            if (!(typeof frame.kind === 'string' && PROTOCOL_KINDS.has(frame.kind))) {
+                this.emitter.emit({
+                    kind:  'error',
+                    error: new Error(
+                        `decrypt failed for senderId=${senderId}.${frame.senderDeviceId} type=${messageType}: ${(err as Error).message}`,
+                    ),
+                })
+            }
             return
         }
         if (dedupKey) this.dedup.record(dedupKey)
+
+        if (typeof frame.kind === 'string' && PROTOCOL_KINDS.has(frame.kind)) {
+            this.logger?.debug({ kind: frame.kind, senderId }, '[receive] dropped protocol envelope (not user input)')
+            return
+        }
 
         // Sniff a JSON payload (attachment or future kinds) vs plain UTF-8 text
         // If the decoded text starts with `{` and the outer JSON has a recognised `type`,
@@ -265,6 +279,10 @@ export class ReceiveFlow {
                     conversationType: 'DIRECT',
                 },
             })
+            return
+        }
+        if (isProtocolPayload(decoded)) {
+            this.logger?.debug({ senderId }, '[receive] dropped protocol payload by type (not user input)')
             return
         }
         const sniffed = sniffStructuredPayload(decoded)
@@ -520,6 +538,11 @@ export class ReceiveFlow {
         }
         if (dedupKey) this.dedup.record(dedupKey)
 
+        if (typeof frame.kind === 'string' && PROTOCOL_KINDS.has(frame.kind)) {
+            this.logger?.debug({ kind: frame.kind, senderId }, '[receive] dropped protocol envelope (group path, not user input)')
+            return
+        }
+
         // CHANNEL vs GROUP from the cached isChannel flag
         // Default GROUP when metadata isn't ready yet, it's only a hint
         // Post vs comment is signalled by threadRootId
@@ -531,6 +554,10 @@ export class ReceiveFlow {
         }
 
         const decoded = this.textDec.decode(plaintextBytes)
+        if (isProtocolPayload(decoded)) {
+            this.logger?.debug({ senderId }, '[receive] dropped protocol payload by type (group path, not user input)')
+            return
+        }
         const sniffed = sniffStructuredPayload(decoded)
         const text       = sniffed?.caption ?? (sniffed === null ? decoded : '')
         const attachment = sniffed?.attachment
@@ -1054,6 +1081,15 @@ function buildIncomingGallery(
     return { items }
 }
 
+
+function isProtocolPayload(plaintext: string): boolean {
+    if (plaintext.length === 0 || plaintext.charCodeAt(0) !== 0x7b) return false
+    let parsed: unknown
+    try { parsed = JSON.parse(plaintext) } catch { return false }
+    if (!parsed || typeof parsed !== 'object') return false
+    const t = (parsed as { type?: unknown }).type
+    return typeof t === 'string' && t.startsWith('morok_') && t !== 'morok_bot_action'
+}
 
 // Internal exports for unit tests
 function parseBotAction(plaintext: string): { controlId: string } | null {

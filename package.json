@@ -1,6 +1,6 @@
 {
   "name": "morok-bot-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Node.js SDK for building bots on the Morok E2E messaging platform",
   "type": "module",
   "main": "./dist/index.js",
@@ -15,6 +15,7 @@
     "dist",
     "README.md",
     "README.ru.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
